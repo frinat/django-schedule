@@ -2,13 +2,11 @@
 from django.contrib.contenttypes import generic
 from django.db import models
 from django.db.models import Q
-from django.contrib.auth.models import User
+from django.utils import timezone as tz
 from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
-from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils.translation import ugettext_lazy as _
 from django.template.defaultfilters import slugify
-import datetime
-from dateutil import rrule
 from schedule.utils import EventListManager
 
 class CalendarManager(models.Manager):
@@ -157,7 +155,7 @@ class Calendar(models.Model):
         """
         CalendarRelation.objects.create_relation(self, obj, distinction, inheritable)
 
-    def get_recent(self, amount=5, in_datetime = datetime.datetime.now):
+    def get_recent(self, amount=5, in_datetime = tz.now):
         """
         This shortcut function allows you to get events that have started
         recently.
@@ -168,7 +166,7 @@ class Calendar(models.Model):
         in_datetime is the datetime you want to check against.  It defaults to
         datetime.datetime.now
         """
-        return self.events.order_by('-start').filter(start__lt=datetime.datetime.now())[:amount]
+        return self.events.order_by('-start').filter(start__lt=tz.now())[:amount]
 
     def occurrences_after(self, date=None):
         return EventListManager(self.events.all()).occurrences_after(date)

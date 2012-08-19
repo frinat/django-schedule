@@ -7,6 +7,7 @@ from django.contrib.contenttypes.models import ContentType
 from django.core.urlresolvers import reverse
 from django.template.defaultfilters import date
 from django.utils.translation import ugettext, ugettext_lazy as _
+from django.utils import timezone as tz
 import datetime
 from dateutil import rrule
 from schedule.models.rules import Rule
@@ -28,7 +29,7 @@ class Event(models.Model):
     title = models.CharField(_("title"), max_length = 255)
     description = models.TextField(_("description"), null = True, blank = True)
     creator = models.ForeignKey(User, null = True, verbose_name=_("creator"))
-    created_on = models.DateTimeField(_("created on"), default = datetime.datetime.now)
+    created_on = models.DateTimeField(_("created on"), default = tz.now)
     rule = models.ForeignKey(Rule, null = True, blank = True, verbose_name=_("rule"), help_text=_("Select '----' for a one time only event."))
     end_recurring_period = models.DateTimeField(_("end recurring period"), null = True, blank = True, help_text=_("This date is ignored for one time only events."))
     calendar = models.ForeignKey(Calendar, blank=True, null=True)
@@ -38,7 +39,7 @@ class Event(models.Model):
         verbose_name = _('event')
         verbose_name_plural = _('events')
         app_label = 'schedule'
-	get_latest_by = 'start' 
+	get_latest_by = 'start'
 
     def __unicode__(self):
         date_format = u'l, %s' % ugettext("DATE_FORMAT")
@@ -148,7 +149,7 @@ class Event(models.Model):
         """
 
         if after is None:
-            after = datetime.datetime.now()
+            after = tz.now()
         rule = self.get_rrule_object()
         if rule is None:
             if self.end > after:
@@ -175,11 +176,11 @@ class Event(models.Model):
         while True:
             next = generator.next()
             yield occ_replacer.get_occurrence(next)
-    
+
     def next_occurrence(self):
         for o in self.occurrences_after():
             return o
-    
+
 
 class EventRelationManager(models.Manager):
     '''

@@ -1,11 +1,10 @@
 from urllib import quote
+from django.utils import timezone as tz
 from django.shortcuts import render_to_response, get_object_or_404
 from django.views.generic.create_update import delete_object
-from django.http import HttpResponseRedirect, Http404, HttpResponse
+from django.http import HttpResponseRedirect, Http404
 from django.template import RequestContext
 from django.core.urlresolvers import reverse
-from django.contrib.auth.models import User
-from django.contrib.auth.decorators import login_required
 from django.views.generic.create_update import delete_object
 import datetime
 
@@ -76,7 +75,7 @@ def calendar_by_periods(request, calendar_slug, periods=None,
         except ValueError:
             raise Http404
     else:
-        date = datetime.datetime.now()
+        date = tz.now()
     event_list = GET_EVENTS_FUNC(request, calendar)
     period_objects = dict([(period.__name__.lower(), period(event_list, date)) for period in periods])
     context = {
@@ -207,7 +206,7 @@ def get_occurrence(event_id, occurrence_id=None, year=None, month=None,
         event = get_object_or_404(Event, id=event_id)
         occurrence = event.get_occurrence(
             datetime.datetime(int(year), int(month), int(day), int(hour),
-                int(minute), int(second)))
+                int(minute), int(second), tzinfo=tz.utc))
         if occurrence is None:
             raise Http404
     else:
